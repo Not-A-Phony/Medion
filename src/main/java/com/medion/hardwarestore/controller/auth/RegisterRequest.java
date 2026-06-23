@@ -11,12 +11,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthRequest {
+public class RegisterRequest {
+    @NotBlank(message = "First name is required")
+    private String firstName;
 
+    @NotBlank(message = "Last name is required")
+    private String lastName;
+
+    @Email(message = "Valid email is required")
     @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
     private String email;
 
     @NotBlank(message = "Password is required")
     private String password;
+
+    private String phoneNumber;
 }

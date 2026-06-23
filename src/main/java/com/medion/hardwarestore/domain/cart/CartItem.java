@@ -7,10 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(exclude = "cart")
+@ToString(exclude = "cart")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

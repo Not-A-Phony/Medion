@@ -20,7 +20,7 @@ public class ProductController {
     public record ProductDto(UUID id, String name, String description, String sku, BigDecimal price, String currency, Integer stockQuantity, UUID storeId) {}
     public record CreateProductRequest(String name, String description, String sku, BigDecimal price, String currency, Integer stockQuantity, UUID storeId) {}
 
-    @GetMapping
+    @GetMapping("/active")
     public ResponseEntity<List<ProductDto>> getAllProducts() {
         List<ProductDto> products = productService.getAllActiveProducts().stream()
                 .map(this::mapToDto)
