@@ -40,3 +40,16 @@ jwt:
   secret: ${JWT_SECRET} # Must be set via environment variable
   expiration: 86400000 # 1 day in ms
   refresh-expiration: 604800000 # 7 days in ms
+
+# Cloudinary Configuration
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
+
+# M-Pesa Configuration
+mpesa:
+  consumer-key: ${MPESA_CONSUMER_KEY}
+  consumer-secret: ${MPESA_CONSUMER_SECRET}
+  passkey: ${MPESA_PASSKEY}
+  shortcode: ${MPESA_SHORTCODE}
