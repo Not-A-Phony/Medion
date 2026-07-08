@@ -5,6 +5,8 @@ import com.medion.hardwarestore.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import com.medion.hardwarestore.domain.user.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,8 +37,9 @@ public class StoreController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<StoreDto> createStore(@RequestBody CreateStoreRequest request) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'STORE_OWNER')")
+    public ResponseEntity<StoreDto> createStore(@RequestBody CreateStoreRequest request, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
         Store store = Store.builder()
                 .name(request.name())
                 .address(request.address())
@@ -45,8 +48,16 @@ public class StoreController {
                 .isActive(true)
                 .build();
         
-        Store savedStore = storeService.createStore(store);
+        Store savedStore = storeService.createStore(store, user.getId());
         return ResponseEntity.ok(mapToDto(savedStore));
+    }
+    
+    @GetMapping("/my-store")
+    @PreAuthorize("hasRole('STORE_OWNER')")
+    public ResponseEntity<StoreDto> getMyStore(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        Store store = storeService.getStoreByOwnerId(user.getId());
+        return ResponseEntity.ok(mapToDto(store));
     }
 
     @GetMapping("/nearest")

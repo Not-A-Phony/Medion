@@ -72,7 +72,7 @@ public class AuthService {
                 .email(request.getIdentifier())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber())
-                .role(Role.CUSTOMER)
+                .role(request.isStoreOwner() ? Role.STORE_OWNER : Role.CUSTOMER)
                 .build();
 
         userRepository.save(user);

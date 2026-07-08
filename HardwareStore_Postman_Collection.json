@@ -1,0 +1,327 @@
+{
+  "info": {
+    "name": "Hardware Store API",
+    "description": "Postman collection for the Hardware Store API, featuring JWT Auth, Cart, Products, and Checkout endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\",\n  \"username\": \"adminUser\",\n  \"email\": \"admin@medion.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"254712345678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "auth", "register" ]
+            }
+          }
+        },
+        {
+          "name": "Login (Super Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) { pm.environment.set(\"accessToken\", jsonData.accessToken); }",
+                  "if (jsonData.refreshToken) { pm.environment.set(\"refreshToken\", jsonData.refreshToken); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"mathu\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "auth", "login" ]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) { pm.environment.set(\"accessToken\", jsonData.accessToken); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "auth", "refresh" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Products",
+      "item": [
+        {
+          "name": "Get All Active Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/active",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "products", "active" ]
+            }
+          }
+        },
+        {
+          "name": "Get Products by Store",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/store/{{storeId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "products", "store", "{{storeId}}" ]
+            }
+          }
+        },
+        {
+          "name": "Create Product (Store Owner/Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bosch Drill\",\n  \"description\": \"Professional hammer drill\",\n  \"sku\": \"BOSCH-001\",\n  \"price\": 12500.00,\n  \"currency\": \"KES\",\n  \"stockQuantity\": 50,\n  \"storeId\": \"{{storeId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "products" ]
+            }
+          }
+        },
+        {
+          "name": "Update Product (Store Owner/Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bosch Drill V2\",\n  \"description\": \"Updated drill description\",\n  \"sku\": \"BOSCH-001\",\n  \"price\": 13500.00,\n  \"currency\": \"KES\",\n  \"stockQuantity\": 45,\n  \"storeId\": \"{{storeId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "products", "{{productId}}" ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product (Soft Delete)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "products", "{{productId}}" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Cart",
+      "item": [
+        {
+          "name": "Get User Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cart",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "cart" ]
+            }
+          }
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cart/items",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "cart", "items" ]
+            }
+          }
+        },
+        {
+          "name": "Remove Item from Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cart/items/{{productId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "cart", "items", "{{productId}}" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Checkout & Orders",
+      "item": [
+        {
+          "name": "Checkout (Convert Cart to Order)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/checkout",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "orders", "checkout" ]
+            }
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "orders", "{{orderId}}" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Stores",
+      "item": [
+        {
+          "name": "Get Nearest Store (Haversine)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/stores/nearest?lat=-1.266667&lon=36.800000",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "stores", "nearest" ],
+              "query": [
+                { "key": "lat", "value": "-1.266667" },
+                { "key": "lon", "value": "36.800000" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Store (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nairobi Central Hardware\",\n  \"address\": \"CBD, Moi Avenue\",\n  \"latitude\": -1.283333,\n  \"longitude\": 36.816667\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/stores",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "stores" ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

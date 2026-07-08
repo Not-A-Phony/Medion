@@ -29,8 +29,17 @@ public class StoreService {
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + id));
     }
 
-    public Store createStore(Store store) {
+    public Store createStore(Store store, UUID ownerId) {
+        if (storeRepository.findByOwnerId(ownerId).isPresent()) {
+            throw new IllegalArgumentException("Store owner already has a store");
+        }
+        store.setOwnerId(ownerId);
         return storeRepository.save(store);
+    }
+    
+    public Store getStoreByOwnerId(UUID ownerId) {
+        return storeRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new ResourceNotFoundException("No store found for this owner"));
     }
 
     // Use Haversine formula to find the nearest store

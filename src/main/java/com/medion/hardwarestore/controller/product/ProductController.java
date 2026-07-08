@@ -5,6 +5,9 @@ import com.medion.hardwarestore.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import com.medion.hardwarestore.domain.user.User;
+import com.medion.hardwarestore.domain.user.Role;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -37,7 +40,8 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('STORE_OWNER', 'ADMIN')")
-    public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductRequest request) {
+    public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductRequest request, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
         Product product = Product.builder()
                 .name(request.name())
                 .description(request.description())
@@ -47,8 +51,7 @@ public class ProductController {
                 .stockQuantity(request.stockQuantity() != null ? request.stockQuantity() : 0)
                 .isActive(true)
                 .build();
-        
-        Product savedProduct = productService.createProduct(product, request.storeId());
+        Product savedProduct = productService.createProduct(product, request.storeId(), user);
         return ResponseEntity.ok(mapToDto(savedProduct));
     }
 
@@ -56,7 +59,10 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('STORE_OWNER', 'ADMIN')")
     public ResponseEntity<ProductDto> updateProduct(
             @PathVariable UUID id, 
-            @RequestBody CreateProductRequest request) {
+            @RequestBody CreateProductRequest request,
+            Authentication authentication) {
+        
+        User user = (User) authentication.getPrincipal();
         
         Product updatedDetails = Product.builder()
                 .name(request.name())
@@ -66,15 +72,15 @@ public class ProductController {
                 .currency(request.currency() != null ? request.currency() : "USD")
                 .stockQuantity(request.stockQuantity() != null ? request.stockQuantity() : 0)
                 .build();
-
-        Product savedProduct = productService.updateProduct(id, updatedDetails);
+        Product savedProduct = productService.updateProduct(id, updatedDetails, user);
         return ResponseEntity.ok(mapToDto(savedProduct));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('STORE_OWNER', 'ADMIN')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
-        productService.deleteProduct(id);
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        productService.deleteProduct(id, user);
         return ResponseEntity.noContent().build();
     }
 

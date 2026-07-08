@@ -37,6 +37,9 @@ public class Store {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Column(name = "owner_id")
+    private UUID ownerId;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
