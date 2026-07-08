@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -47,7 +48,7 @@ public class Store {
 
     @Column(name = "commission_rate")
     @Builder.Default
-    private Double commissionRate = 5.0; // Default 5%
+    private BigDecimal commissionRate = new BigDecimal("5.0"); // Default 5%
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

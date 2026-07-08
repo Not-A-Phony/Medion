@@ -48,7 +48,7 @@ public class OrderService {
         for (CartItem cartItem : cart.getItems()) {
             BigDecimal platformCommission = BigDecimal.ZERO;
             if (cartItem.getProduct().getStore().getSubscriptionType() == SubscriptionType.COMMISSION) {
-                BigDecimal commissionRate = BigDecimal.valueOf(cartItem.getProduct().getStore().getCommissionRate()).divide(BigDecimal.valueOf(100));
+                BigDecimal commissionRate = cartItem.getProduct().getStore().getCommissionRate().divide(BigDecimal.valueOf(100));
                 platformCommission = cartItem.getProduct().getPrice()
                         .multiply(BigDecimal.valueOf(cartItem.getQuantity()))
                         .multiply(commissionRate);

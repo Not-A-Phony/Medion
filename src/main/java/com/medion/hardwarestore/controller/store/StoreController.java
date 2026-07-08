@@ -20,7 +20,7 @@ public class StoreController {
     private final StoreService storeService;
 
     public record StoreDto(UUID id, String name, String address, Double latitude, Double longitude) {}
-    public record CreateStoreRequest(String name, String address, Double latitude, Double longitude) {}
+    public record CreateStoreRequest(String name, String address, Double latitude, Double longitude, com.medion.hardwarestore.domain.store.SubscriptionType subscriptionType) {}
 
     @GetMapping
     public ResponseEntity<List<StoreDto>> getAllStores() {
@@ -45,6 +45,7 @@ public class StoreController {
                 .address(request.address())
                 .latitude(request.latitude())
                 .longitude(request.longitude())
+                .subscriptionType(request.subscriptionType() != null ? request.subscriptionType() : com.medion.hardwarestore.domain.store.SubscriptionType.COMMISSION)
                 .isActive(true)
                 .build();
         
