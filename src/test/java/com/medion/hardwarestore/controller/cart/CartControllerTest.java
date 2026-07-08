@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medion.hardwarestore.domain.product.Product;
 import com.medion.hardwarestore.domain.store.Store;
 import com.medion.hardwarestore.domain.store.StoreRepository;
+import com.medion.hardwarestore.domain.user.User;
+import com.medion.hardwarestore.domain.user.UserRepository;
 import com.medion.hardwarestore.service.ProductService;
 import com.medion.hardwarestore.controller.auth.RegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +39,9 @@ public class CartControllerTest {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private String token;
     private Product testProduct;
@@ -77,7 +82,8 @@ public class CartControllerTest {
                 .stockQuantity(10)
                 .isActive(true)
                 .build();
-        testProduct = productService.createProduct(product, store.getId());
+        User user = userRepository.findByEmail("test.cart@example.com").orElseThrow();
+        testProduct = productService.createProduct(product, store.getId(), user);
     }
 
     @Test

@@ -6,6 +6,8 @@ import com.medion.hardwarestore.controller.cart.CartController;
 import com.medion.hardwarestore.domain.product.Product;
 import com.medion.hardwarestore.domain.store.Store;
 import com.medion.hardwarestore.domain.store.StoreRepository;
+import com.medion.hardwarestore.domain.user.User;
+import com.medion.hardwarestore.domain.user.UserRepository;
 import com.medion.hardwarestore.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +40,9 @@ public class OrderControllerTest {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private String token;
     private Product testProduct;
@@ -76,7 +81,8 @@ public class OrderControllerTest {
                 .stockQuantity(10)
                 .isActive(true)
                 .build();
-        testProduct = productService.createProduct(product, store.getId());
+        User user = userRepository.findByEmail("test.order@example.com").orElseThrow();
+        testProduct = productService.createProduct(product, store.getId(), user);
     }
 
     @Test
