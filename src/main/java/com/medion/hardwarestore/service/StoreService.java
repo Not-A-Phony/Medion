@@ -2,6 +2,8 @@ package com.medion.hardwarestore.service;
 
 import com.medion.hardwarestore.domain.store.Store;
 import com.medion.hardwarestore.domain.store.StoreRepository;
+import com.medion.hardwarestore.domain.user.User;
+import com.medion.hardwarestore.domain.user.Role;
 import com.medion.hardwarestore.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,6 +42,33 @@ public class StoreService {
     public Store getStoreByOwnerId(UUID ownerId) {
         return storeRepository.findByOwnerId(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("No store found for this owner"));
+    }
+
+    public Store updateStore(UUID id, Store updatedDetails, User user) {
+        Store existingStore = getStoreById(id);
+        if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(existingStore.getOwnerId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You can only update your own store");
+        }
+        existingStore.setName(updatedDetails.getName());
+        existingStore.setAddress(updatedDetails.getAddress());
+        existingStore.setLatitude(updatedDetails.getLatitude());
+        existingStore.setLongitude(updatedDetails.getLongitude());
+        if (updatedDetails.getSubscriptionType() != null) {
+            existingStore.setSubscriptionType(updatedDetails.getSubscriptionType());
+        }
+        if (updatedDetails.getCommissionRate() != null) {
+            existingStore.setCommissionRate(updatedDetails.getCommissionRate());
+        }
+        return storeRepository.save(existingStore);
+    }
+
+    public void deleteStore(UUID id, User user) {
+        Store existingStore = getStoreById(id);
+        if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(existingStore.getOwnerId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You can only delete your own store");
+        }
+        existingStore.setIsActive(false);
+        storeRepository.save(existingStore);
     }
 
     // Use Haversine formula to find the nearest store

@@ -30,14 +30,19 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     public AuthResponse login(AuthRequest request) {
+        String identifier = request.getIdentifier();
+        if (identifier == null || identifier.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username or Email is required for login");
+        }
+        
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getIdentifier(),
+                        identifier,
                         request.getPassword()
                 )
         );
 
-        User user = userRepository.findByEmail(request.getIdentifier())
+        User user = userRepository.findByEmail(identifier)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String jwtToken = jwtService.generateToken(user);
@@ -62,7 +67,12 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.findByEmail(request.getIdentifier()).isPresent()) {
+        String identifier = request.getIdentifier();
+        if (identifier == null || identifier.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username or Email is required");
+        }
+
+        if (userRepository.findByEmail(identifier).isPresent()) {
             throw new IllegalArgumentException("Username/Email already exists");
         }
 

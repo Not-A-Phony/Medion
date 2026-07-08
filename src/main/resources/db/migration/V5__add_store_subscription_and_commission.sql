@@ -1,0 +1,4 @@
+ALTER TABLE stores ADD COLUMN subscription_type VARCHAR(255) DEFAULT 'COMMISSION';
+ALTER TABLE stores ADD COLUMN commission_rate DECIMAL(5,2) DEFAULT 5.0;
+
+ALTER TABLE order_items ADD COLUMN platform_commission DECIMAL(10,2) DEFAULT 0.00;

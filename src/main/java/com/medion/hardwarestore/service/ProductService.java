@@ -22,9 +22,7 @@ public class ProductService {
 
     @Cacheable(value = "products")
     public List<Product> getAllActiveProducts() {
-        return productRepository.findAll().stream()
-                .filter(Product::getIsActive)
-                .toList();
+        return productRepository.findRandomActiveProducts();
     }
 
     public Product getProductById(UUID id) {

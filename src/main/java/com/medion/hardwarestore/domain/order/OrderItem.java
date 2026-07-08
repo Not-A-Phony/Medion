@@ -42,6 +42,10 @@ public class OrderItem {
     @Column(nullable = false)
     private BigDecimal price;
 
+    @Column(name = "platform_commission")
+    @Builder.Default
+    private BigDecimal platformCommission = BigDecimal.ZERO;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 

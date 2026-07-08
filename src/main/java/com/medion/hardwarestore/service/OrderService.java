@@ -6,6 +6,7 @@ import com.medion.hardwarestore.domain.order.Order;
 import com.medion.hardwarestore.domain.order.OrderItem;
 import com.medion.hardwarestore.domain.order.OrderRepository;
 import com.medion.hardwarestore.domain.order.OrderStatus;
+import com.medion.hardwarestore.domain.store.SubscriptionType;
 import com.medion.hardwarestore.exception.BusinessException;
 import com.medion.hardwarestore.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -45,10 +46,19 @@ public class OrderService {
                 .build();
 
         for (CartItem cartItem : cart.getItems()) {
+            BigDecimal platformCommission = BigDecimal.ZERO;
+            if (cartItem.getProduct().getStore().getSubscriptionType() == SubscriptionType.COMMISSION) {
+                BigDecimal commissionRate = BigDecimal.valueOf(cartItem.getProduct().getStore().getCommissionRate()).divide(BigDecimal.valueOf(100));
+                platformCommission = cartItem.getProduct().getPrice()
+                        .multiply(BigDecimal.valueOf(cartItem.getQuantity()))
+                        .multiply(commissionRate);
+            }
+
             OrderItem orderItem = OrderItem.builder()
                     .product(cartItem.getProduct())
                     .quantity(cartItem.getQuantity())
                     .price(cartItem.getProduct().getPrice())
+                    .platformCommission(platformCommission)
                     .build();
             order.addItem(orderItem);
         }

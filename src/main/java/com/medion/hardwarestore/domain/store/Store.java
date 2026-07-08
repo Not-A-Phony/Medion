@@ -40,6 +40,15 @@ public class Store {
     @Column(name = "owner_id")
     private UUID ownerId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subscription_type")
+    @Builder.Default
+    private SubscriptionType subscriptionType = SubscriptionType.COMMISSION;
+
+    @Column(name = "commission_rate")
+    @Builder.Default
+    private Double commissionRate = 5.0; // Default 5%
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
