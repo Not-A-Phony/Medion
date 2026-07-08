@@ -4,6 +4,7 @@ import com.medion.hardwarestore.domain.product.Product;
 import com.medion.hardwarestore.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -35,6 +36,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('STORE_OWNER', 'ADMIN')")
     public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductRequest request) {
         Product product = Product.builder()
                 .name(request.name())
@@ -48,6 +50,32 @@ public class ProductController {
         
         Product savedProduct = productService.createProduct(product, request.storeId());
         return ResponseEntity.ok(mapToDto(savedProduct));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('STORE_OWNER', 'ADMIN')")
+    public ResponseEntity<ProductDto> updateProduct(
+            @PathVariable UUID id, 
+            @RequestBody CreateProductRequest request) {
+        
+        Product updatedDetails = Product.builder()
+                .name(request.name())
+                .description(request.description())
+                .sku(request.sku())
+                .price(request.price())
+                .currency(request.currency() != null ? request.currency() : "USD")
+                .stockQuantity(request.stockQuantity() != null ? request.stockQuantity() : 0)
+                .build();
+
+        Product savedProduct = productService.updateProduct(id, updatedDetails);
+        return ResponseEntity.ok(mapToDto(savedProduct));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('STORE_OWNER', 'ADMIN')")
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 
     private ProductDto mapToDto(Product product) {

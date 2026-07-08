@@ -35,4 +35,21 @@ public class ProductService {
         product.setStore(store);
         return productRepository.save(product);
     }
+
+    public Product updateProduct(UUID id, Product updatedProductDetails) {
+        Product existingProduct = getProductById(id);
+        existingProduct.setName(updatedProductDetails.getName());
+        existingProduct.setDescription(updatedProductDetails.getDescription());
+        existingProduct.setSku(updatedProductDetails.getSku());
+        existingProduct.setPrice(updatedProductDetails.getPrice());
+        existingProduct.setCurrency(updatedProductDetails.getCurrency());
+        existingProduct.setStockQuantity(updatedProductDetails.getStockQuantity());
+        return productRepository.save(existingProduct);
+    }
+
+    public void deleteProduct(UUID id) {
+        Product product = getProductById(id);
+        product.setIsActive(false); // Soft delete
+        productRepository.save(product);
+    }
 }
