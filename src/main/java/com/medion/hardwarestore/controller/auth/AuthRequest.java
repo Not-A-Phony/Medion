@@ -12,9 +12,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthRequest {
 
-    @NotBlank(message = "Username or Email is required")
     private String email;
+    
+    private String username;
 
     @NotBlank(message = "Password is required")
     private String password;
+    
+    public String getIdentifier() {
+        return (username != null && !username.trim().isEmpty()) ? username : email;
+    }
 }

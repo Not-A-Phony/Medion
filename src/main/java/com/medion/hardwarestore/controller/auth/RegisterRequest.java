@@ -17,8 +17,13 @@ public class RegisterRequest {
     @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @NotBlank(message = "Username or Email is required")
     private String email;
+    
+    private String username;
+    
+    public String getIdentifier() {
+        return (username != null && !username.trim().isEmpty()) ? username : email;
+    }
 
     @NotBlank(message = "Password is required")
     private String password;
