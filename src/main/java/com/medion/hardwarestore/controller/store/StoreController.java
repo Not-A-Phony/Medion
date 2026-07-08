@@ -4,6 +4,7 @@ import com.medion.hardwarestore.domain.store.Store;
 import com.medion.hardwarestore.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class StoreController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StoreDto> createStore(@RequestBody CreateStoreRequest request) {
         Store store = Store.builder()
                 .name(request.name())
