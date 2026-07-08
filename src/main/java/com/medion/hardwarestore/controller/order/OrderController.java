@@ -2,6 +2,7 @@ package com.medion.hardwarestore.controller.order;
 
 import com.medion.hardwarestore.domain.order.Order;
 import com.medion.hardwarestore.service.OrderService;
+import com.medion.hardwarestore.integration.payment.PesapalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,23 +17,25 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PesapalService pesapalService;
 
     public record OrderItemDto(UUID productId, Integer quantity, BigDecimal price) {}
-    public record OrderDto(UUID id, String status, BigDecimal totalAmount, List<OrderItemDto> items) {}
+    public record OrderDto(UUID id, String status, BigDecimal totalAmount, String paymentUrl, List<OrderItemDto> items) {}
 
     @PostMapping("/checkout")
     public ResponseEntity<OrderDto> checkoutCart() {
         Order order = orderService.placeOrderFromCart();
-        return ResponseEntity.ok(mapToDto(order));
+        String paymentUrl = pesapalService.initiatePayment(order, order.getUser().getPhoneNumber());
+        return ResponseEntity.ok(mapToDto(order, paymentUrl));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getOrder(@PathVariable UUID id) {
         Order order = orderService.getOrderById(id);
-        return ResponseEntity.ok(mapToDto(order));
+        return ResponseEntity.ok(mapToDto(order, null)); // Or retrieve the existing paymentUrl if saved in DB
     }
 
-    private OrderDto mapToDto(Order order) {
+    private OrderDto mapToDto(Order order, String paymentUrl) {
         List<OrderItemDto> items = order.getItems().stream()
                 .map(item -> new OrderItemDto(
                         item.getProduct().getId(),
@@ -40,6 +43,6 @@ public class OrderController {
                         item.getPrice()
                 )).toList();
 
-        return new OrderDto(order.getId(), order.getStatus().name(), order.getTotalAmount(), items);
+        return new OrderDto(order.getId(), order.getStatus().name(), order.getTotalAmount(), paymentUrl, items);
     }
 }

@@ -55,3 +55,11 @@ mpesa:
   shortcode: ${MPESA_SHORTCODE}
 
 
+
+app:
+  encryption:
+    key: ${APP_ENCRYPTION_KEY}
+
+
+    refresh-expiration: 604800000
+

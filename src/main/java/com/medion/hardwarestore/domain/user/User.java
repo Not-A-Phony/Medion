@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.medion.hardwarestore.security.AttributeEncryptor;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -42,6 +43,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @Convert(converter = AttributeEncryptor.class)
     @Column(name = "phone_number")
     private String phoneNumber;
 

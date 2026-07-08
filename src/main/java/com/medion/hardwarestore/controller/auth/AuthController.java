@@ -29,4 +29,11 @@ public class AuthController {
     ) {
         return ResponseEntity.ok(authService.register(request));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenRefreshResponse> refreshToken(
+            @Valid @RequestBody TokenRefreshRequest request
+    ) {
+        return ResponseEntity.ok(authService.refreshToken(request));
+    }
 }

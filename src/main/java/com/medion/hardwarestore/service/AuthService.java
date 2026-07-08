@@ -11,7 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.medion.hardwarestore.security.RefreshTokenService;
+import com.medion.hardwarestore.domain.user.RefreshToken;
 import com.medion.hardwarestore.controller.auth.RegisterRequest;
+import com.medion.hardwarestore.controller.auth.TokenRefreshRequest;
+import com.medion.hardwarestore.controller.auth.TokenRefreshResponse;
 import com.medion.hardwarestore.domain.user.Role;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +27,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthResponse login(AuthRequest request) {
         authenticationManager.authenticate(
@@ -36,7 +41,10 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        
+        // Delete old refresh tokens and create a new one
+        refreshTokenService.deleteByUserId(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         UserProfile profile = UserProfile.builder()
                 .id(user.getId())
@@ -48,7 +56,7 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .accessToken(jwtToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshToken.getToken())
                 .profile(profile)
                 .build();
     }
@@ -70,7 +78,7 @@ public class AuthService {
         userRepository.save(user);
 
         String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         UserProfile profile = UserProfile.builder()
                 .id(user.getId())
@@ -82,8 +90,21 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .accessToken(jwtToken)
-                .refreshToken(refreshToken)
+                .refreshToken(refreshToken.getToken())
                 .profile(profile)
                 .build();
+    }
+
+    public TokenRefreshResponse refreshToken(TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+        
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtService.generateToken(user);
+                    return new TokenRefreshResponse(token, requestRefreshToken);
+                })
+                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 }
