@@ -11,15 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthRequest {
-
-    private String email;
-    
+    @NotBlank(message = "Username is required")
     private String username;
 
     @NotBlank(message = "Password is required")
     private String password;
-    
-    public String getIdentifier() {
-        return (username != null && !username.trim().isEmpty()) ? username : email;
-    }
 }

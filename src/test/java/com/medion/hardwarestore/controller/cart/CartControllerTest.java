@@ -53,6 +53,7 @@ public class CartControllerTest {
                 .firstName("Test")
                 .lastName("User")
                 .email("test.cart@example.com")
+                .username("testcart")
                 .password("password123")
                 .build();
 

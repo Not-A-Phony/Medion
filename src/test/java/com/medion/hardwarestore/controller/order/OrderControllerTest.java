@@ -53,6 +53,7 @@ public class OrderControllerTest {
                 .firstName("Test")
                 .lastName("Order")
                 .email("test.order@example.com")
+                .username("testorder")
                 .password("password123")
                 .build();
 

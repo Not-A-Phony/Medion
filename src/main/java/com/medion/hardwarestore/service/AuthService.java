@@ -19,6 +19,9 @@ import com.medion.hardwarestore.controller.auth.TokenRefreshResponse;
 import com.medion.hardwarestore.domain.user.Role;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -30,22 +33,24 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     public AuthResponse login(AuthRequest request) {
-        String identifier = request.getIdentifier();
-        if (identifier == null || identifier.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username or Email is required for login");
+        String username = request.getUsername();
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username is required for login");
         }
         
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        identifier,
+                        username,
                         request.getPassword()
                 )
         );
 
-        User user = userRepository.findByEmail(identifier)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        String jwtToken = jwtService.generateToken(user);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("role", user.getRole().name());
+        String jwtToken = jwtService.generateToken(extraClaims, user);
         
         // Delete old refresh tokens and create a new one
         refreshTokenService.deleteByUserId(user);
@@ -53,6 +58,7 @@ public class AuthService {
 
         UserProfile profile = UserProfile.builder()
                 .id(user.getId())
+                .username(user.getUsername())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -67,19 +73,22 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
-        String identifier = request.getIdentifier();
-        if (identifier == null || identifier.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username or Email is required");
-        }
+        String username = request.getUsername();
+        String email = request.getEmail();
 
-        if (userRepository.findByEmail(identifier).isPresent()) {
-            throw new IllegalArgumentException("Username/Email already exists");
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email already exists");
         }
 
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getIdentifier())
+                .email(request.getEmail())
+                .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber())
                 .role(request.isStoreOwner() ? Role.STORE_OWNER : Role.CUSTOMER)
@@ -87,11 +96,14 @@ public class AuthService {
 
         userRepository.save(user);
 
-        String jwtToken = jwtService.generateToken(user);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("role", user.getRole().name());
+        String jwtToken = jwtService.generateToken(extraClaims, user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         UserProfile profile = UserProfile.builder()
                 .id(user.getId())
+                .username(user.getUsername())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -112,7 +124,9 @@ public class AuthService {
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    String token = jwtService.generateToken(user);
+                    Map<String, Object> extraClaims = new HashMap<>();
+                    extraClaims.put("role", user.getRole().name());
+                    String token = jwtService.generateToken(extraClaims, user);
                     return new TokenRefreshResponse(token, requestRefreshToken);
                 })
                 .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));

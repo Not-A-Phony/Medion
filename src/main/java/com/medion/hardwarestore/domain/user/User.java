@@ -28,6 +28,9 @@ public class User implements UserDetails {
     private UUID id;
 
     @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(name = "password_hash", nullable = false)
@@ -60,7 +63,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override

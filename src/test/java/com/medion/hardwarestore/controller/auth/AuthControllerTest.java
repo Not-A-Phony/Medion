@@ -29,6 +29,7 @@ public class AuthControllerTest {
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .firstName("John")
                 .lastName("Doe")
+                .username("johndoe")
                 .email("john.doe@medion.com")
                 .password("password123")
                 .phoneNumber("254700000000")
@@ -43,7 +44,7 @@ public class AuthControllerTest {
 
         // 2. Login with the same user
         AuthRequest loginRequest = AuthRequest.builder()
-                .email("john.doe@medion.com")
+                .username("johndoe")
                 .password("password123")
                 .build();
 

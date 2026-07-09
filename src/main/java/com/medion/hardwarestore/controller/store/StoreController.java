@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import com.medion.hardwarestore.domain.user.User;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +23,12 @@ public class StoreController {
     private final StoreService storeService;
 
     public record StoreDto(UUID id, String name, String address, Double latitude, Double longitude) {}
-    public record CreateStoreRequest(String name, String address, Double latitude, Double longitude, com.medion.hardwarestore.domain.store.SubscriptionType subscriptionType) {}
+    public record CreateStoreRequest(
+            @NotBlank(message = "Store name is required") String name, 
+            @NotBlank(message = "Store address is required") String address, 
+            @NotNull(message = "Latitude is required") Double latitude, 
+            @NotNull(message = "Longitude is required") Double longitude, 
+            com.medion.hardwarestore.domain.store.SubscriptionType subscriptionType) {}
 
     @GetMapping
     public ResponseEntity<List<StoreDto>> getAllStores() {
@@ -38,7 +46,7 @@ public class StoreController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STORE_OWNER')")
-    public ResponseEntity<StoreDto> createStore(@RequestBody CreateStoreRequest request, Authentication authentication) {
+    public ResponseEntity<StoreDto> createStore(@Valid @RequestBody CreateStoreRequest request, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         Store store = Store.builder()
                 .name(request.name())
