@@ -34,7 +34,7 @@ public class ProductService {
         Store store = storeService.getStoreById(storeId);
         
         if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(store.getOwnerId())) {
-            throw new org.springframework.security.access.AccessDeniedException("You can only create products for your own store");
+            throw new com.medion.hardwarestore.exception.BusinessException("You can only create products for your own store");
         }
         
         product.setStore(store);
@@ -45,7 +45,7 @@ public class ProductService {
         Product existingProduct = getProductById(id);
         
         if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(existingProduct.getStore().getOwnerId())) {
-            throw new org.springframework.security.access.AccessDeniedException("You can only update products for your own store");
+            throw new com.medion.hardwarestore.exception.BusinessException("You can only update products for your own store");
         }
         
         existingProduct.setName(updatedProductDetails.getName());
@@ -61,7 +61,7 @@ public class ProductService {
         Product product = getProductById(id);
         
         if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(product.getStore().getOwnerId())) {
-            throw new org.springframework.security.access.AccessDeniedException("You can only delete products for your own store");
+            throw new com.medion.hardwarestore.exception.BusinessException("You can only delete products for your own store");
         }
         
         product.setIsActive(false); // Soft delete

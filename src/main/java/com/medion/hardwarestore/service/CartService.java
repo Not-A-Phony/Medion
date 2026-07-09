@@ -8,7 +8,7 @@ import com.medion.hardwarestore.domain.user.User;
 import com.medion.hardwarestore.domain.user.UserRepository;
 import com.medion.hardwarestore.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,8 +71,18 @@ public class CartService {
     }
 
     private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        // Since auth is removed, return a generic user or create one if none exists
+        return userRepository.findAll().stream().findFirst()
+                .orElseGet(() -> {
+                    User dummy = User.builder()
+                            .username("guest")
+                            .email("guest@example.com")
+                            .firstName("Guest")
+                            .lastName("User")
+                            .role(com.medion.hardwarestore.domain.user.Role.CUSTOMER)
+                            .password("nopassword")
+                            .build();
+                    return userRepository.save(dummy);
+                });
     }
 }

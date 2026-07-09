@@ -47,7 +47,7 @@ public class StoreService {
     public Store updateStore(UUID id, Store updatedDetails, User user) {
         Store existingStore = getStoreById(id);
         if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(existingStore.getOwnerId())) {
-            throw new org.springframework.security.access.AccessDeniedException("You can only update your own store");
+            throw new com.medion.hardwarestore.exception.BusinessException("You can only update your own store");
         }
         existingStore.setName(updatedDetails.getName());
         existingStore.setAddress(updatedDetails.getAddress());
@@ -65,7 +65,7 @@ public class StoreService {
     public void deleteStore(UUID id, User user) {
         Store existingStore = getStoreById(id);
         if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(existingStore.getOwnerId())) {
-            throw new org.springframework.security.access.AccessDeniedException("You can only delete your own store");
+            throw new com.medion.hardwarestore.exception.BusinessException("You can only delete your own store");
         }
         existingStore.setIsActive(false);
         storeRepository.save(existingStore);

@@ -1,7 +1,6 @@
 package com.medion.hardwarestore.controller.order;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.medion.hardwarestore.controller.auth.RegisterRequest;
 import com.medion.hardwarestore.controller.cart.CartController;
 import com.medion.hardwarestore.domain.product.Product;
 import com.medion.hardwarestore.domain.store.Store;
@@ -39,31 +38,24 @@ public class OrderControllerTest {
     private StoreRepository storeRepository;
 
     @Autowired
-    private ProductService productService;
-
-    @Autowired
     private UserRepository userRepository;
 
-    private String token;
+    @Autowired
+    private ProductService productService;
+
     private Product testProduct;
 
     @BeforeEach
     void setup() throws Exception {
-        RegisterRequest registerRequest = RegisterRequest.builder()
+        User user = User.builder()
                 .firstName("Test")
                 .lastName("Order")
                 .email("test.order@example.com")
                 .username("testorder")
                 .password("password123")
+                .role(com.medion.hardwarestore.domain.user.Role.CUSTOMER)
                 .build();
-
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registerRequest)))
-                .andReturn();
-
-        String responseStr = result.getResponse().getContentAsString();
-        token = objectMapper.readTree(responseStr).get("accessToken").asText();
+        userRepository.save(user);
 
         Store store = Store.builder()
                 .name("Order Store")
@@ -82,8 +74,8 @@ public class OrderControllerTest {
                 .stockQuantity(10)
                 .isActive(true)
                 .build();
-        User user = userRepository.findByEmail("test.order@example.com").orElseThrow();
-        testProduct = productService.createProduct(product, store.getId(), user);
+        User savedUser = userRepository.findByEmail("test.order@example.com").orElseThrow();
+        testProduct = productService.createProduct(product, store.getId(), savedUser);
     }
 
     @Test
@@ -91,13 +83,11 @@ public class OrderControllerTest {
         CartController.AddItemRequest request = new CartController.AddItemRequest(testProduct.getId(), 2);
 
         mockMvc.perform(post("/api/v1/cart/items")
-                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/v1/orders/checkout")
-                        .header("Authorization", "Bearer " + token))
+        mockMvc.perform(post("/api/v1/orders/checkout"))
                 .andExpect(status().isOk());
     }
 }
