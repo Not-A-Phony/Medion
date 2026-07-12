@@ -7,4 +7,5 @@ import java.util.UUID;
 public interface StorePaymentRepository extends JpaRepository<StorePayment, UUID> {
     Optional<StorePayment> findByMerchantReference(String merchantReference);
     Optional<StorePayment> findByTrackingId(String trackingId);
+    Optional<StorePayment> findFirstByStoreIdOrderByCreatedAtDesc(UUID storeId);
 }

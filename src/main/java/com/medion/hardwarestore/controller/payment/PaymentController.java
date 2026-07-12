@@ -70,9 +70,9 @@ public class PaymentController {
             
             Store store = payment.getStore();
             if (store.getStatus() == StoreStatus.PENDING_PAYMENT) {
-                store.setStatus(StoreStatus.PENDING); // Moves to Admin Approval
+                store.setStatus(StoreStatus.APPROVED); // Auto-Approve Store upon payment
                 storeRepository.save(store);
-                log.info("Store {} payment completed via MPESA. Status updated to PENDING.", store.getId());
+                log.info("Store {} payment completed via MPESA. Status updated to APPROVED.", store.getId());
             }
             return;
         }
@@ -110,9 +110,9 @@ public class PaymentController {
             
             Store store = payment.getStore();
             if (store.getStatus() == StoreStatus.PENDING_PAYMENT) {
-                store.setStatus(StoreStatus.PENDING); // Moves to Admin Approval
+                store.setStatus(StoreStatus.APPROVED); // Auto-Approve Store upon payment
                 storeRepository.save(store);
-                log.info("Store {} payment completed. Status updated to PENDING.", store.getId());
+                log.info("Store {} payment completed. Status updated to APPROVED.", store.getId());
             }
             return ResponseEntity.ok("Store Subscription Payment Successful!");
         }
@@ -162,5 +162,26 @@ public class PaymentController {
         }
 
         log.info("Platform took a total cut of {} KES. Funds routed to 0798480715 conceptually.", totalPlatformRevenue);
+    }
+
+    /**
+     * Poll the status of a store subscription payment
+     */
+    @GetMapping("/store-subscription/{storeId}/status")
+    public ResponseEntity<PaymentStatus> getStoreSubscriptionStatus(@PathVariable UUID storeId) {
+        Optional<Store> storeOpt = storeRepository.findById(storeId);
+        if (storeOpt.isPresent()) {
+            Store store = storeOpt.get();
+            // If the store is already APPROVED or PENDING (admin approval), payment was successful
+            if (store.getStatus() == StoreStatus.APPROVED || store.getStatus() == StoreStatus.PENDING) {
+                return ResponseEntity.ok(PaymentStatus.SUCCESS);
+            }
+            // If it's still PENDING_PAYMENT, we can check the latest store payment record
+            Optional<StorePayment> paymentOpt = storePaymentRepository.findFirstByStoreIdOrderByCreatedAtDesc(storeId);
+            if (paymentOpt.isPresent()) {
+                return ResponseEntity.ok(paymentOpt.get().getStatus());
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 }
