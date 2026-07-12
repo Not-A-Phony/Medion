@@ -7,11 +7,8 @@ spring:
     virtual:
       enabled: true
 
-  # Database Configuration
+  # Database Configuration is handled by DatabaseConfig class to support Render URLs
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/hardware_db}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   # JPA / Hibernate Configuration
