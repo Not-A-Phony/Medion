@@ -19,9 +19,10 @@ public class CartController {
 
     private final CartService cartService;
 
-    public record CartItemDto(UUID productId, String productName, Integer quantity, BigDecimal price) {}
-    public record CartDto(UUID id, List<CartItemDto> items, BigDecimal total) {}
+    public record CartItemDto(UUID id, UUID productId, String productName, Integer quantity, BigDecimal price) {}
+    public record CartDto(UUID id, UUID userId, List<CartItemDto> items, BigDecimal totalAmount) {}
     public record AddItemRequest(UUID productId, Integer quantity) {}
+    public record UpdateItemRequest(Integer quantity) {}
 
     @GetMapping
     public ResponseEntity<CartDto> getCart(@AuthenticationPrincipal User user) {
@@ -38,28 +39,39 @@ public class CartController {
         return ResponseEntity.ok(mapToDto(cart));
     }
 
-    @DeleteMapping("/items/{productId}")
-    public ResponseEntity<CartDto> removeItem(
-            @PathVariable UUID productId,
+    @PutMapping("/items/{itemId}")
+    public ResponseEntity<CartDto> updateItem(
+            @PathVariable UUID itemId,
+            @RequestBody UpdateItemRequest request,
             @AuthenticationPrincipal User user
     ) {
-        Cart cart = cartService.removeItemFromCart(productId, user);
+        Cart cart = cartService.updateItemQuantity(itemId, request.quantity(), user);
+        return ResponseEntity.ok(mapToDto(cart));
+    }
+
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<CartDto> removeItem(
+            @PathVariable UUID itemId,
+            @AuthenticationPrincipal User user
+    ) {
+        Cart cart = cartService.removeItemFromCart(itemId, user);
         return ResponseEntity.ok(mapToDto(cart));
     }
 
     private CartDto mapToDto(Cart cart) {
-        List<CartItemDto> items = cart.getItems().stream()
+        List<CartItemDto> items = cart.getItems() == null ? List.of() : cart.getItems().stream()
                 .map(item -> new CartItemDto(
+                        item.getId(),
                         item.getProduct().getId(),
                         item.getProduct().getName(),
                         item.getQuantity(),
                         item.getProduct().getPrice()
                 )).toList();
 
-        BigDecimal total = cart.getItems().stream()
+        BigDecimal totalAmount = cart.getItems() == null ? BigDecimal.ZERO : cart.getItems().stream()
                 .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new CartDto(cart.getId(), items, total);
+        return new CartDto(cart.getId(), cart.getUser().getId(), items, totalAmount);
     }
 }

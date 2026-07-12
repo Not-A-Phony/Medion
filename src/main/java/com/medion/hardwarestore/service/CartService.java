@@ -55,9 +55,24 @@ public class CartService {
     }
 
     @Transactional
-    public Cart removeItemFromCart(UUID productId, User user) {
+    public Cart updateItemQuantity(UUID itemId, int quantity, User user) {
         Cart cart = getCartForUser(user);
-        cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
+        Optional<CartItem> existingItem = cart.getItems().stream()
+                .filter(item -> item.getId().equals(itemId))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            existingItem.get().setQuantity(quantity);
+        } else {
+            throw new ResourceNotFoundException("Cart item not found");
+        }
+        return cartRepository.save(cart);
+    }
+
+    @Transactional
+    public Cart removeItemFromCart(UUID itemId, User user) {
+        Cart cart = getCartForUser(user);
+        cart.getItems().removeIf(item -> item.getId().equals(itemId));
         return cartRepository.save(cart);
     }
 
