@@ -5,7 +5,6 @@ import com.medion.hardwarestore.domain.cart.CartItem;
 import com.medion.hardwarestore.domain.cart.CartRepository;
 import com.medion.hardwarestore.domain.product.Product;
 import com.medion.hardwarestore.domain.user.User;
-import com.medion.hardwarestore.domain.user.UserRepository;
 import com.medion.hardwarestore.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -21,11 +20,9 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final ProductService productService;
-    private final UserRepository userRepository;
 
     @Transactional
-    public Cart getCartForCurrentUser() {
-        User user = getCurrentUser();
+    public Cart getCartForUser(User user) {
         return cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> {
                     Cart newCart = Cart.builder().user(user).build();
@@ -34,8 +31,8 @@ public class CartService {
     }
 
     @Transactional
-    public Cart addItemToCart(UUID productId, int quantity) {
-        Cart cart = getCartForCurrentUser();
+    public Cart addItemToCart(UUID productId, int quantity, User user) {
+        Cart cart = getCartForUser(user);
         Product product = productService.getProductById(productId);
 
         Optional<CartItem> existingItem = cart.getItems().stream()
@@ -58,8 +55,8 @@ public class CartService {
     }
 
     @Transactional
-    public Cart removeItemFromCart(UUID productId) {
-        Cart cart = getCartForCurrentUser();
+    public Cart removeItemFromCart(UUID productId, User user) {
+        Cart cart = getCartForUser(user);
         cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
         return cartRepository.save(cart);
     }
@@ -68,21 +65,5 @@ public class CartService {
     public void clearCart(Cart cart) {
         cart.getItems().clear();
         cartRepository.save(cart);
-    }
-
-    private User getCurrentUser() {
-        // Since auth is removed, return a generic user or create one if none exists
-        return userRepository.findAll().stream().findFirst()
-                .orElseGet(() -> {
-                    User dummy = User.builder()
-                            .username("guest")
-                            .email("guest@example.com")
-                            .firstName("Guest")
-                            .lastName("User")
-                            .role(com.medion.hardwarestore.domain.user.Role.CUSTOMER)
-                            .password("nopassword")
-                            .build();
-                    return userRepository.save(dummy);
-                });
     }
 }

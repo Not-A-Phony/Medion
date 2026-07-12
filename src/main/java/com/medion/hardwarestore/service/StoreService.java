@@ -2,11 +2,11 @@ package com.medion.hardwarestore.service;
 
 import com.medion.hardwarestore.domain.store.Store;
 import com.medion.hardwarestore.domain.store.StoreRepository;
+import com.medion.hardwarestore.domain.store.StoreStatus;
 import com.medion.hardwarestore.domain.user.User;
 import com.medion.hardwarestore.domain.user.Role;
 import com.medion.hardwarestore.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -23,7 +23,12 @@ public class StoreService {
     public List<Store> getAllActiveStores() {
         return storeRepository.findAll().stream()
                 .filter(Store::getIsActive)
+                .filter(s -> s.getStatus() == StoreStatus.APPROVED)
                 .toList();
+    }
+
+    public List<Store> getAllStores() {
+        return storeRepository.findAll();
     }
 
     public Store getStoreById(UUID id) {
@@ -32,21 +37,17 @@ public class StoreService {
     }
 
     public Store createStore(Store store, UUID ownerId) {
-        if (storeRepository.findByOwnerId(ownerId).isPresent()) {
-            throw new IllegalArgumentException("Store owner already has a store");
-        }
         store.setOwnerId(ownerId);
         return storeRepository.save(store);
     }
     
-    public Store getStoreByOwnerId(UUID ownerId) {
-        return storeRepository.findByOwnerId(ownerId)
-                .orElseThrow(() -> new ResourceNotFoundException("No store found for this owner"));
+    public List<Store> getStoresByOwnerId(UUID ownerId) {
+        return storeRepository.findByOwnerId(ownerId);
     }
 
     public Store updateStore(UUID id, Store updatedDetails, User user) {
         Store existingStore = getStoreById(id);
-        if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(existingStore.getOwnerId())) {
+        if (user.getRole() == Role.STORE_VENDOR && !user.getId().equals(existingStore.getOwnerId())) {
             throw new com.medion.hardwarestore.exception.BusinessException("You can only update your own store");
         }
         existingStore.setName(updatedDetails.getName());
@@ -64,11 +65,23 @@ public class StoreService {
 
     public void deleteStore(UUID id, User user) {
         Store existingStore = getStoreById(id);
-        if (user.getRole() == Role.STORE_OWNER && !user.getId().equals(existingStore.getOwnerId())) {
+        if (user.getRole() == Role.STORE_VENDOR && !user.getId().equals(existingStore.getOwnerId())) {
             throw new com.medion.hardwarestore.exception.BusinessException("You can only delete your own store");
         }
         existingStore.setIsActive(false);
         storeRepository.save(existingStore);
+    }
+    
+    public Store approveStore(UUID id) {
+        Store existingStore = getStoreById(id);
+        existingStore.setStatus(StoreStatus.APPROVED);
+        return storeRepository.save(existingStore);
+    }
+    
+    public Store rejectStore(UUID id) {
+        Store existingStore = getStoreById(id);
+        existingStore.setStatus(StoreStatus.REJECTED);
+        return storeRepository.save(existingStore);
     }
 
     // Use Haversine formula to find the nearest store

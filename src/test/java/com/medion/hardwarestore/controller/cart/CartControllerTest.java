@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithUserDetails;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -64,6 +66,7 @@ public class CartControllerTest {
                 .latitude(0.0)
                 .longitude(0.0)
                 .isActive(true)
+                .status(com.medion.hardwarestore.domain.store.StoreStatus.APPROVED)
                 .build();
         storeRepository.save(store);
 
@@ -80,6 +83,7 @@ public class CartControllerTest {
     }
 
     @Test
+    @WithUserDetails(value = "testcart", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void testAddToCart() throws Exception {
         CartController.AddItemRequest request = new CartController.AddItemRequest(testProduct.getId(), 2);
 

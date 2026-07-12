@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.medion.hardwarestore.domain.store.StoreStatus;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +37,7 @@ class StoreServiceTest {
                 .latitude(-1.286389)
                 .longitude(36.817223)
                 .isActive(true)
+                .status(StoreStatus.APPROVED)
                 .build();
 
         mombasaStore = Store.builder()
@@ -43,6 +46,7 @@ class StoreServiceTest {
                 .latitude(-4.043477)
                 .longitude(39.668206)
                 .isActive(true)
+                .status(StoreStatus.APPROVED)
                 .build();
     }
 

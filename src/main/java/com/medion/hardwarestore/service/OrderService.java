@@ -7,6 +7,7 @@ import com.medion.hardwarestore.domain.order.OrderItem;
 import com.medion.hardwarestore.domain.order.OrderRepository;
 import com.medion.hardwarestore.domain.order.OrderStatus;
 import com.medion.hardwarestore.domain.store.SubscriptionType;
+import com.medion.hardwarestore.domain.user.User;
 import com.medion.hardwarestore.exception.BusinessException;
 import com.medion.hardwarestore.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,8 @@ public class OrderService {
     private final CartService cartService;
 
     @Transactional
-    public Order placeOrderFromCart() {
-        Cart cart = cartService.getCartForCurrentUser();
+    public Order placeOrderFromCart(User user) {
+        Cart cart = cartService.getCartForUser(user);
 
         if (cart.getItems().isEmpty()) {
             throw new BusinessException("Cart is empty");
@@ -36,10 +37,8 @@ public class OrderService {
                 .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Assuming all items are from the same store for simplicity here,
-        // or just taking the store from the first product
         Order order = Order.builder()
-                .user(cart.getUser())
+                .user(user)
                 .store(cart.getItems().get(0).getProduct().getStore())
                 .totalAmount(totalAmount)
                 .status(OrderStatus.PENDING)
@@ -70,11 +69,7 @@ public class OrderService {
     }
 
     public List<Order> getUserOrders(UUID userId) {
-        // Find orders by user id logic
-        // This is simplified. Normally you'd add findByUserId in OrderRepository
-        return orderRepository.findAll().stream()
-                .filter(order -> order.getUser().getId().equals(userId))
-                .toList();
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     public Order getOrderById(UUID id) {

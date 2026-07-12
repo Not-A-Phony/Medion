@@ -1,0 +1,3 @@
+ALTER TABLE stores ADD COLUMN average_rating DECIMAL(3,2) DEFAULT 0.0;
+ALTER TABLE stores ADD COLUMN review_count INTEGER DEFAULT 0;
+ALTER TABLE stores ADD COLUMN is_featured BOOLEAN DEFAULT false;
