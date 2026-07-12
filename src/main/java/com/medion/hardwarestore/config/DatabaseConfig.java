@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 @Configuration
 public class DatabaseConfig {
 
-    @Value("${DATABASE_URL:${DB_URL:jdbc:postgresql://localhost:5432/hardware_db}}")
+    @Value("${DATABASE_URL:${DB_URL:${DB_HOST:jdbc:postgresql://localhost:5432/hardware_db}}}")
     private String dbUrl;
 
     @Value("${DB_USER:postgres}")
