@@ -6,9 +6,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=hardware_db
+      - DB_URL=jdbc:postgresql://postgres:5432/hardware_db
       - DB_USER=medion
       - DB_PASSWORD=medion_secret
       - REDIS_HOST=redis
