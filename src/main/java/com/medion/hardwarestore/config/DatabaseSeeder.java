@@ -91,7 +91,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .username("admin")
                     .role(Role.ADMIN)
                     .build();
-            userRepository.save(admin);
+            userRepository.saveAndFlush(admin);
         }
 
         if (userRepository.findByEmail("vendor1@medion.com").isEmpty()) {
@@ -103,7 +103,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .username("bob_builder")
                     .role(Role.STORE_VENDOR)
                     .build();
-            userRepository.save(vendor1);
+            userRepository.saveAndFlush(vendor1);
         }
 
         if (userRepository.findByEmail("vendor2@medion.com").isEmpty()) {
@@ -115,7 +115,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .username("alice_smith")
                     .role(Role.STORE_VENDOR)
                     .build();
-            userRepository.save(vendor2);
+            userRepository.saveAndFlush(vendor2);
         }
     }
 
@@ -204,7 +204,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .adsUrls(adsUrls)
                     .build();
             
-            store = storeRepository.save(store);
+            store = storeRepository.saveAndFlush(store);
             storeCategoryMap.put(store, storeTypes[i]);
             
             // Follow logic mock (10-50 random followers per store, simulating via jdbc since we just need the count for analytics, or creating entities)
