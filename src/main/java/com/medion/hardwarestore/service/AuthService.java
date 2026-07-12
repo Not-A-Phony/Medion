@@ -28,9 +28,15 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username is already taken");
+        String username = request.getUsername();
+        if (username == null || username.trim().isEmpty()) {
+            username = request.getEmail().split("@")[0] + "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
         }
+        
+        if (userRepository.existsByUsername(username)) {
+            username = username + "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
+        }
+        
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email is already taken");
         }
@@ -40,7 +46,7 @@ public class AuthService {
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .username(request.getUsername())
+                .username(username)
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber())
