@@ -50,6 +50,9 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @Column(name = "tracking_id")
+    private String trackingId;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();

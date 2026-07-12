@@ -26,7 +26,22 @@ public class WalletService {
         wallet.setPendingBalance(wallet.getPendingBalance().add(amount));
         walletRepository.save(wallet);
 
-        createTransaction(wallet, "SALE", amount, referenceId);
+        createTransaction(wallet, "SALE_PENDING", amount, referenceId);
+    }
+
+    @Transactional
+    public void creditWithdrawableBalance(UUID vendorId, BigDecimal amount, String referenceId) {
+        Wallet wallet = walletRepository.findByVendorId(vendorId)
+                .orElseGet(() -> {
+                    Wallet newWallet = Wallet.builder().vendor(com.medion.hardwarestore.domain.user.User.builder().id(vendorId).build()).build();
+                    return walletRepository.save(newWallet);
+                });
+
+        wallet.setWithdrawableBalance(wallet.getWithdrawableBalance().add(amount));
+        wallet.setBalance(wallet.getPendingBalance().add(wallet.getWithdrawableBalance()));
+        walletRepository.save(wallet);
+
+        createTransaction(wallet, "SALE_COMPLETED", amount, referenceId);
     }
 
     @Transactional

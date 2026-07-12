@@ -3,6 +3,8 @@ package com.medion.hardwarestore.service;
 import com.medion.hardwarestore.domain.category.Category;
 import com.medion.hardwarestore.domain.category.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+//import org.springframework.cache.annotation.CacheEvict;
+//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class CategoryService {
         return categoryRepository.findByType(type.toUpperCase());
     }
 
+//    @Cacheable(value = "categories")
     public List<Category> getFeaturedCategories() {
         return categoryRepository.findByIsFeaturedTrue().stream()
                 .sorted((c1, c2) -> {
@@ -37,6 +40,7 @@ public class CategoryService {
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
     }
 
+//    @CacheEvict(value = "categories", allEntries = true)
     public Category createCategory(Category category, UUID parentId) {
         if (parentId != null) {
             Category parent = categoryRepository.findById(parentId)

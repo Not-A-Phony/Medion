@@ -7,6 +7,8 @@ import com.medion.hardwarestore.domain.user.User;
 import com.medion.hardwarestore.domain.user.Role;
 import com.medion.hardwarestore.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+//import org.springframework.cache.annotation.CacheEvict;
+//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -20,6 +22,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private static final int EARTH_RADIUS_KM = 6371;
 
+//    @Cacheable(value = "stores")
     public List<Store> getAllActiveStores() {
         return storeRepository.findAll().stream()
                 .filter(Store::getIsActive)
@@ -36,6 +39,7 @@ public class StoreService {
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with ID: " + id));
     }
 
+//    @CacheEvict(value = "stores", allEntries = true)
     public Store createStore(Store store, UUID ownerId) {
         store.setOwnerId(ownerId);
         return storeRepository.save(store);
@@ -45,6 +49,7 @@ public class StoreService {
         return storeRepository.findByOwnerId(ownerId);
     }
 
+//    @CacheEvict(value = "stores", allEntries = true)
     public Store updateStore(UUID id, Store updatedDetails, User user) {
         Store existingStore = getStoreById(id);
         if (user.getRole() == Role.STORE_VENDOR && !user.getId().equals(existingStore.getOwnerId())) {
@@ -63,6 +68,7 @@ public class StoreService {
         return storeRepository.save(existingStore);
     }
 
+//    @CacheEvict(value = "stores", allEntries = true)
     public void deleteStore(UUID id, User user) {
         Store existingStore = getStoreById(id);
         if (user.getRole() == Role.STORE_VENDOR && !user.getId().equals(existingStore.getOwnerId())) {
@@ -72,12 +78,14 @@ public class StoreService {
         storeRepository.save(existingStore);
     }
     
+//    @CacheEvict(value = "stores", allEntries = true)
     public Store approveStore(UUID id) {
         Store existingStore = getStoreById(id);
         existingStore.setStatus(StoreStatus.APPROVED);
         return storeRepository.save(existingStore);
     }
     
+//    @CacheEvict(value = "stores", allEntries = true)
     public Store rejectStore(UUID id) {
         Store existingStore = getStoreById(id);
         existingStore.setStatus(StoreStatus.REJECTED);

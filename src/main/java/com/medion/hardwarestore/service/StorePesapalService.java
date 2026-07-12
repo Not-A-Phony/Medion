@@ -24,8 +24,8 @@ public class StorePesapalService {
         // In a real integration, we would call Pesapal API here
         // and extract the redirect_url from the response.
         
-        // Return a mock redirect URL
-        return "https://cybqa.pesapal.com/pesapaliframe/PesapalIframe3/Index?OrderTrackingId=" + UUID.randomUUID().toString();
+        // Return a mock redirect URL that points to our Demo Success Webhook
+        return "http://localhost:8080/api/v1/payments/demo-success?merchantReference=" + payment.getMerchantReference();
     }
     
     /**

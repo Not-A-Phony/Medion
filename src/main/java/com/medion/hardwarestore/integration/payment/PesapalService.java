@@ -20,8 +20,8 @@ public class PesapalService implements PaymentProcessor {
     @Override
     public String initiatePayment(Order order, String phoneNumber) {
         log.info("Initiating Pesapal payment for order {} with amount {}", order.getId(), order.getTotalAmount());
-        // Stub: Generate Iframe link or redirect URL
-        return "PESAPAL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        // Return a simulated URL pointing to our demo endpoint
+        return "http://localhost:8080/api/v1/payments/demo-success?merchantReference=" + order.getId().toString();
     }
 
     @Override

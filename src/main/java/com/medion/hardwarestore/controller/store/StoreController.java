@@ -5,7 +5,7 @@ import com.medion.hardwarestore.domain.store.StoreFollower;
 import com.medion.hardwarestore.domain.store.StoreFollowerRepository;
 import com.medion.hardwarestore.domain.store.StoreStatus;
 import com.medion.hardwarestore.service.StoreService;
-import com.medion.hardwarestore.service.StorePesapalService;
+import com.medion.hardwarestore.integration.payment.MpesaGatewayService;
 import com.medion.hardwarestore.service.ProductService;
 import com.medion.hardwarestore.controller.product.ProductController.ProductDto;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class StoreController {
 
     private final StoreService storeService;
     private final ProductService productService;
-    private final StorePesapalService pesapalService;
+    private final MpesaGatewayService mpesaService;
     private final com.medion.hardwarestore.domain.payment.StorePaymentRepository storePaymentRepository;
     private final StoreFollowerRepository storeFollowerRepository;
     private final JdbcTemplate jdbcTemplate;
@@ -41,7 +41,7 @@ public class StoreController {
             StoreStatus status, Double averageRating, Integer reviewCount, Boolean isFeatured,
             String logoUrl, String bannerUrl, String bio, List<String> adsUrls) {}
     
-    public record CreateStoreResponse(StoreDto store, String paymentUrl) {}
+    public record CreateStoreResponse(StoreDto store, String mpesaStatus) {}
     
     public record CreateStoreRequest(
             @NotBlank(message = "Store name is required") String name, 
@@ -90,7 +90,7 @@ public class StoreController {
         
         Store savedStore = storeService.createStore(store, user.getId());
         
-        String paymentUrl = null;
+        String mpesaStatus = null;
         if (subType != com.medion.hardwarestore.domain.store.SubscriptionType.COMMISSION) {
             com.medion.hardwarestore.domain.payment.StorePayment payment = com.medion.hardwarestore.domain.payment.StorePayment.builder()
                     .store(savedStore)
@@ -101,10 +101,17 @@ public class StoreController {
                     .build();
             
             payment = storePaymentRepository.save(payment);
-            paymentUrl = pesapalService.submitOrder(payment);
+            String checkoutRequestId = mpesaService.initiateStkPush(user.getPhoneNumber(), payment.getAmount().longValue(), payment.getMerchantReference());
+            
+            if (checkoutRequestId != null) {
+                payment.setTrackingId(checkoutRequestId);
+                storePaymentRepository.save(payment);
+            }
+            
+            mpesaStatus = (checkoutRequestId != null) ? "STK_PUSH_SENT" : "STK_PUSH_FAILED";
         }
         
-        return ResponseEntity.ok(new CreateStoreResponse(mapToDto(savedStore), paymentUrl));
+        return ResponseEntity.ok(new CreateStoreResponse(mapToDto(savedStore), mpesaStatus));
     }
     
     @GetMapping("/my-stores")

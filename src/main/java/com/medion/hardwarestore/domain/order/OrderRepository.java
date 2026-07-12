@@ -9,4 +9,5 @@ import java.util.UUID;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    java.util.Optional<Order> findByTrackingId(String trackingId);
 }

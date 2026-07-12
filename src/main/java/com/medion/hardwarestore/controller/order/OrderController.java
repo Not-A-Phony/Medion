@@ -3,7 +3,7 @@ package com.medion.hardwarestore.controller.order;
 import com.medion.hardwarestore.domain.order.Order;
 import com.medion.hardwarestore.domain.user.User;
 import com.medion.hardwarestore.service.OrderService;
-import com.medion.hardwarestore.integration.payment.PesapalService;
+import com.medion.hardwarestore.integration.payment.MpesaGatewayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,16 +20,24 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
-    private final PesapalService pesapalService;
+    private final MpesaGatewayService mpesaService;
+    private final com.medion.hardwarestore.domain.order.OrderRepository orderRepository;
 
     public record OrderItemDto(UUID productId, String productName, Integer quantity, BigDecimal price) {}
-    public record OrderDto(UUID id, String status, BigDecimal totalAmount, String paymentUrl, LocalDateTime createdAt, List<OrderItemDto> items) {}
+    public record OrderDto(UUID id, String status, BigDecimal totalAmount, String mpesaStatus, LocalDateTime createdAt, List<OrderItemDto> items) {}
 
     @PostMapping("/checkout")
     public ResponseEntity<OrderDto> checkoutCart(@AuthenticationPrincipal User user) {
         Order order = orderService.placeOrderFromCart(user);
-        String paymentUrl = pesapalService.initiatePayment(order, order.getUser().getPhoneNumber());
-        return ResponseEntity.ok(mapToDto(order, paymentUrl));
+        String checkoutRequestId = mpesaService.initiateStkPush(order.getUser().getPhoneNumber(), order.getTotalAmount().longValue(), order.getId().toString());
+        
+        if (checkoutRequestId != null) {
+            order.setTrackingId(checkoutRequestId);
+            orderRepository.save(order);
+        }
+        
+        String mpesaStatus = (checkoutRequestId != null) ? "STK_PUSH_SENT" : "STK_PUSH_FAILED";
+        return ResponseEntity.ok(mapToDto(order, mpesaStatus));
     }
 
     @GetMapping("/{id}")
@@ -49,7 +57,7 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    private OrderDto mapToDto(Order order, String paymentUrl) {
+    private OrderDto mapToDto(Order order, String mpesaStatus) {
         List<OrderItemDto> items = order.getItems().stream()
                 .map(item -> new OrderItemDto(
                         item.getProduct().getId(),
@@ -58,6 +66,6 @@ public class OrderController {
                         item.getPrice()
                 )).toList();
 
-        return new OrderDto(order.getId(), order.getStatus().name(), order.getTotalAmount(), paymentUrl, order.getCreatedAt(), items);
+        return new OrderDto(order.getId(), order.getStatus().name(), order.getTotalAmount(), mpesaStatus, order.getCreatedAt(), items);
     }
 }
