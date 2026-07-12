@@ -1,5 +1,8 @@
 # Medion Hardware Store API
 
+> **Proprietary & Confidential**
+> 
+> This software is the confidential and proprietary property of Medion. It is not open-source. Unauthorized copying, distribution, or modification is strictly prohibited.
 ![Medion Hardware API Banner](https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=1200&q=80)
 
 A powerful, robust, and scalable Spring Boot RESTful API powering the **Medion Multivendor Hardware & Local Services Marketplace**. The system allows vendors to set up stores, users to browse products and services, and seamlessly handles secure checkout and geographic features.
@@ -91,4 +94,4 @@ This project is structured and fully ready for cloud deployment. To deploy on pl
 4. Run the generated `.jar` file using `java -jar target/hardwarestore-0.0.1-SNAPSHOT.jar`.
 
 ---
-*Developed with best practices in mind, this backend provides a solid, secure foundation for any multivendor e-commerce operation.*
+*Developed as a proprietary, enterprise-grade SaaS backend providing a solid, secure foundation for the Medion multivendor e-commerce operation. All Rights Reserved.*
