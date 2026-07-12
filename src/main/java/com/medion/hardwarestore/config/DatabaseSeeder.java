@@ -148,15 +148,17 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private Category createCategory(String name, String slug, String type, boolean isFeatured, String imageUrl) {
-        Category category = Category.builder()
-                .name(name)
-                .slug(slug)
-                .type(type)
-                .isFeatured(isFeatured)
-                .status("ACTIVE")
-                .imageUrl(imageUrl)
-                .build();
-        return categoryRepository.save(category);
+        return categoryRepository.findBySlug(slug).orElseGet(() -> {
+            Category category = Category.builder()
+                    .name(name)
+                    .slug(slug)
+                    .type(type)
+                    .isFeatured(isFeatured)
+                    .status("ACTIVE")
+                    .imageUrl(imageUrl)
+                    .build();
+            return categoryRepository.save(category);
+        });
     }
 
     private Map<Store, String> generateStores(List<User> vendors) {
