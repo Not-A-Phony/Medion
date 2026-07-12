@@ -30,6 +30,11 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getFeaturedCategories());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable UUID id) {
+        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    }
+
     @GetMapping("/type/{type}")
     public ResponseEntity<List<Category>> getCategoriesByType(@PathVariable String type) {
         return ResponseEntity.ok(categoryService.getCategoriesByType(type));

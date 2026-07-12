@@ -26,6 +26,11 @@ public class CategoryService {
         return categoryRepository.findByIsFeaturedTrue();
     }
 
+    public Category getCategoryById(UUID id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+    }
+
     public Category createCategory(Category category, UUID parentId) {
         if (parentId != null) {
             Category parent = categoryRepository.findById(parentId)
