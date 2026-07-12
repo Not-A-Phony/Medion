@@ -23,7 +23,13 @@ public class CategoryService {
     }
 
     public List<Category> getFeaturedCategories() {
-        return categoryRepository.findByIsFeaturedTrue();
+        return categoryRepository.findByIsFeaturedTrue().stream()
+                .sorted((c1, c2) -> {
+                    if ("Local Services".equals(c1.getName())) return -1;
+                    if ("Local Services".equals(c2.getName())) return 1;
+                    return 0;
+                })
+                .toList();
     }
 
     public Category getCategoryById(UUID id) {

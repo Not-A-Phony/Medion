@@ -121,6 +121,17 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private List<Category> createCategories() {
         List<Category> list = new ArrayList<>();
+        
+        // Requested New Categories
+        list.add(createCategory("Local Services", "local-services", "SERVICE", true, "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80"));
+        list.add(createCategory("Furniture", "furniture", "PRODUCT", true, "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"));
+        list.add(createCategory("Electronics", "electronics", "PRODUCT", true, "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800&q=80"));
+        list.add(createCategory("Computers & Phones", "computers-phones", "PRODUCT", true, "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&q=80"));
+        list.add(createCategory("Kitchenware", "kitchenware", "PRODUCT", true, "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80"));
+        list.add(createCategory("Clothes & Shoes", "clothes-shoes", "PRODUCT", true, "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80"));
+        list.add(createCategory("Tools & Building Materials", "tools-building-materials", "PRODUCT", true, "https://images.unsplash.com/photo-1584284852158-768f5c357731?w=800&q=80"));
+
+        // Keep existing ones for store seeding compat
         list.add(createCategory("Power Tools", "power-tools", "PRODUCT", true, "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&q=80"));
         list.add(createCategory("Hand Tools", "hand-tools", "PRODUCT", true, "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=800&q=80"));
         list.add(createCategory("Lumber & Building", "lumber-building", "PRODUCT", true, "https://images.unsplash.com/photo-1584284852158-768f5c357731?w=800&q=80"));
