@@ -37,4 +37,12 @@ build/
 
 ### Others ###
 *.log
+
+### Secrets / Environment ###
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.p12

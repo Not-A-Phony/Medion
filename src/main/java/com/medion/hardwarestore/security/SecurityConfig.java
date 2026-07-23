@@ -42,6 +42,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/stores/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+
+                // M-Pesa callbacks are invoked unauthenticated by Safaricom servers
+                .requestMatchers("/api/v1/payments/mpesa/callback").permitAll()
+                .requestMatchers("/api/v1/payments/mpesa-webhook").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/subscriptions/plans").permitAll()
                 
                 // Admin specific endpoints
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

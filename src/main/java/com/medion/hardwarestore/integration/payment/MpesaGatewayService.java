@@ -34,7 +34,7 @@ public class MpesaGatewayService {
     private String shortcode;
 
     // We'll use a webhook URL that the frontend/backend can expose using ngrok, but for now we default to localhost
-    @Value("${mpesa.callback-url:http://localhost:8080/api/v1/payments/mpesa-webhook}")
+    @Value("${mpesa.callback-url:https://medion-6dal.onrender.com/api/v1/payments/mpesa-webhook}")
     private String callbackUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();

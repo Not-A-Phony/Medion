@@ -14,4 +14,8 @@ public class MpesaConfig {
     private String shortcode;
     // For sandbox use "https://sandbox.safaricom.co.ke", for prod use "https://api.safaricom.co.ke"
     private String baseUrl = "https://sandbox.safaricom.co.ke";
+    // Publicly reachable callback for order STK pushes (raw Daraja nested JSON)
+    private String callbackUrl = "https://medion-6dal.onrender.com/api/v1/payments/mpesa-webhook";
+    // Toggle sandbox vs live environment
+    private boolean isLive = false;
 }

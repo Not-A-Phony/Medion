@@ -11,15 +11,23 @@ import com.medion.hardwarestore.domain.store.Store;
 import com.medion.hardwarestore.domain.store.StoreRepository;
 import com.medion.hardwarestore.domain.store.StoreStatus;
 import com.medion.hardwarestore.domain.store.SubscriptionType;
+import com.medion.hardwarestore.domain.user.User;
+import com.medion.hardwarestore.dto.payment.InitiateSubscriptionPaymentRequest;
+import com.medion.hardwarestore.dto.payment.MpesaCallbackRequest;
+import com.medion.hardwarestore.dto.payment.PaymentResponse;
+import com.medion.hardwarestore.service.PaymentService;
 import com.medion.hardwarestore.service.WalletService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,7 +41,43 @@ public class PaymentController {
     private final StoreRepository storeRepository;
     private final OrderRepository orderRepository;
     private final WalletService walletService;
+    private final PaymentService paymentService;
     private final ObjectMapper objectMapper;
+
+    /**
+     * Initiate a subscription payment (STK Push) for the current user's store.
+     */
+    @PostMapping("/subscription/initiate")
+    public ResponseEntity<PaymentResponse> initiateSubscriptionPayment(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody InitiateSubscriptionPaymentRequest request) {
+        PaymentResponse response = paymentService.initiateSubscriptionPayment(
+                user, request.amount(), request.phoneNumber(), request.storeId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Dedicated structured M-Pesa callback endpoint (public - called by Safaricom).
+     */
+    @PostMapping("/mpesa/callback")
+    public ResponseEntity<Map<String, String>> handleMpesaCallback(
+            @RequestBody MpesaCallbackRequest callbackRequest) {
+        try {
+            paymentService.handleMpesaCallback(callbackRequest);
+            return ResponseEntity.ok(Map.of("status", "success"));
+        } catch (Exception e) {
+            log.error("Failed to process M-Pesa callback", e);
+            return ResponseEntity.internalServerError().body(Map.of("status", "error"));
+        }
+    }
+
+    /**
+     * Poll the status of a payment transaction.
+     */
+    @GetMapping("/{transactionId}/status")
+    public ResponseEntity<PaymentResponse> getPaymentStatus(@PathVariable UUID transactionId) {
+        return ResponseEntity.ok(paymentService.getPaymentStatus(transactionId));
+    }
 
     /**
      * Real MPESA Daraja STK Push Webhook

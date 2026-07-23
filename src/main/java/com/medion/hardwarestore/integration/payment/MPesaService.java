@@ -58,7 +58,7 @@ public class MPesaService implements PaymentProcessor {
                     formattedPhone,
                     config.getShortcode(),
                     formattedPhone,
-                    "https://your-render-domain.onrender.com/api/v1/payments/mpesa/callback", // Replace with your live URL
+                    config.getCallbackUrl(),
                     order.getId().toString(),
                     "Payment for Order " + order.getId()
             );
